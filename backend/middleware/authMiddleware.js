@@ -1,28 +1,35 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const asyncHandler = require('express-async-handler');
 
-const protect = (allowedRoles = []) => {
-  return async (req, res, next) => {
-    const token = req.cookies.token;
 
-    if (!token) return res.status(401).json({ message: 'Not authorized!' });
+const protect = asyncHandler(async (req, res, next) => {
+  const token = req.cookies.token;
 
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const user = await User.findById(decoded.id).select('-password');
+  if (!token) {
+    res.status(401);
+    throw new Error('Not authorized, no token');
+  }
 
-      if (!user) return res.status(401).json({ message: 'User not found' });
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  req.user = await User.findById(decoded.id).select('-password');
 
-      if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-        return res.status(403).json({ message: 'Access denied: insufficient permissions' });
-      }
+  if (!req.user) {
+    res.status(401);
+    throw new Error('Not authorized, user not found');
+  }
 
-      req.user = user;
-      next();
-    } catch (err) {
-      res.status(401).json({ message: 'Invalid token' });
+  next();
+});
+
+
+const authorize = (allowedRoles = []) => {
+  return (req, res, next) => {
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({ message: 'Forbidden: You are not allowed' });
     }
+    next();
   };
 };
 
-module.exports = protect;
+module.exports = { protect, authorize };
