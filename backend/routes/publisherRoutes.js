@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
 
-const protected = require('../middleware/authMiddleware');
+const {protect} = require('../middleware/authMiddleware');
 const { getAllPublishers, storePublisher, updatePublisher, deletePublisher } = require('../controllers/publisherController');
 
-router.route('/').get(getAllPublishers).post(protected, storePublisher);
-router.route('/:id').update(protected, updatePublisher).delete(protected, deletePublisher);
+router.route('/').get(getAllPublishers).post(protect, storePublisher);
+router.route('/:id').put(protect, updatePublisher).delete(protect, deletePublisher);
+
+module.exports = router;

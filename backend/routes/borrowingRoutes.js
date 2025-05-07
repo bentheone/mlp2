@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
 
-const protected = require('../middleware/authMiddleware');
+const {protect} = require('../middleware/authMiddleware');
 const { getAllBorrowings, storeBorrowing, updateBorrowing, deleteBorrowing } = require('../controllers/borrowingController');
 
-router.route('/').get(protected, getAllBorrowings).post(protected, storeBorrowing);
-router.route('/:id').update(protected, updateBorrowing).delete(protected, deleteBorrowing);
+router.route('/').get(protect, getAllBorrowings).post(protect, storeBorrowing);
+router.route('/:id').put(protect, updateBorrowing).delete(protect, deleteBorrowing);
+
+module.exports = router;

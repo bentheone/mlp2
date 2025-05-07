@@ -1,8 +1,10 @@
-const express = requuire('express');
+const express = require('express');
 const router = express.Router();
 
-const protected = require('../middleware/authMiddleware');
-const {getAllRequests, storeRequest, updateRequest, deleteRequest} = require('../controllers/requestController');
+const {protect} = require('../middleware/authMiddleware');
+const {getAllRequests, storeRequest, updateRequest, deleteRequest} = require('../controllers/borrowingRequestController');
 
-router.route('/').get(getAllRequests).post(protected, storeRequest);
-router.route('/:id').update(protected, updateRequest).delete(protected, deleteRequest);
+router.route('/').get(getAllRequests).post(protect, storeRequest);
+router.route('/:id').put(protect, updateRequest).delete(protect, deleteRequest);
+
+module.exports = router;
